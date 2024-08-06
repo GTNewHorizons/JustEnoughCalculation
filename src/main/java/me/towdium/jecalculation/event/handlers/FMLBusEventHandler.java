@@ -4,6 +4,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
+import cpw.mods.fml.common.network.FMLNetworkEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import me.towdium.jecalculation.JustEnoughCalculation;
@@ -24,14 +25,9 @@ public class FMLBusEventHandler {
         JecaGui.onKey();
     }
 
-    /**
-     * No effect at client only
-     *
-     * @param event event
-     */
     @Deprecated
     @SubscribeEvent
-    public void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+    public void onLogout(FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
         JustEnoughCalculation.logger.info("on log out event");
         Controller.writeToLocal();
         LPlaceholder.onLogOut();
