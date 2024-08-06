@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import me.towdium.jecalculation.data.structure.*;
 import net.minecraft.client.entity.EntityClientPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,12 +25,6 @@ import cpw.mods.fml.relauncher.SideOnly;
 import me.towdium.jecalculation.JecaConfig;
 import me.towdium.jecalculation.JustEnoughCalculation;
 import me.towdium.jecalculation.data.label.labels.LPlaceholder;
-import me.towdium.jecalculation.data.structure.IRecord;
-import me.towdium.jecalculation.data.structure.Recipe;
-import me.towdium.jecalculation.data.structure.Recipes;
-import me.towdium.jecalculation.data.structure.RecordCraft;
-import me.towdium.jecalculation.data.structure.RecordMath;
-import me.towdium.jecalculation.data.structure.RecordPlayer;
 import me.towdium.jecalculation.polyfill.MethodsReturnNonnullByDefault;
 import me.towdium.jecalculation.utils.Utilities;
 import me.towdium.jecalculation.utils.wrappers.Pair;
@@ -44,10 +39,12 @@ import me.towdium.jecalculation.utils.wrappers.Pair;
 public class Controller {
 
     public static final String KEY_MATH = "math";
+    public static final String KEY_GROUPCRAFT = "groupCraft";
     public static final String KEY_CRAFT = "craft";
     public static final String KEY_PLAYER = "player";
 
     static RecordPlayer rPlayerClient;
+    static RecordGroupCraft rGroupCraftClient;
     static RecordCraft rCraftClient;
     static RecordMath rMathClient;
 
@@ -181,6 +178,14 @@ public class Controller {
         return getR(rCraftClient, KEY_CRAFT, RecordCraft::new);
     }
 
+    public static RecordGroupCraft getRGroupCraft() {
+        return getR(rGroupCraftClient, KEY_GROUPCRAFT, RecordGroupCraft::new);
+    }
+
+    public static void setRGroupCraft(RecordGroupCraft rgc) {
+        setR(rgc, i -> rGroupCraftClient = i, KEY_GROUPCRAFT);
+    }
+
     public static RecordMath getRMath() {
         return getR(rMathClient, KEY_MATH, RecordMath::new);
     }
@@ -224,12 +229,14 @@ public class Controller {
         boolean s = LPlaceholder.state;
         LPlaceholder.state = true;
         if (nbt != null) {
+            rGroupCraftClient = new RecordGroupCraft(nbt.getCompoundTag(KEY_GROUPCRAFT));
             rCraftClient = new RecordCraft(nbt.getCompoundTag(KEY_CRAFT));
             rMathClient = new RecordMath(nbt.getCompoundTag(KEY_MATH));
             rPlayerClient = nbt.hasKey(KEY_PLAYER) ? new RecordPlayer(nbt.getCompoundTag(KEY_PLAYER))
                 : new RecordPlayer();
         } else {
             rPlayerClient = new RecordPlayer();
+            rGroupCraftClient = new RecordGroupCraft(new NBTTagCompound());
             rCraftClient = new RecordCraft(new NBTTagCompound());
             rMathClient = new RecordMath(new NBTTagCompound());
         }
@@ -239,6 +246,7 @@ public class Controller {
     public static void writeToLocal() {
         File file = JecaConfig.recordFile;
         NBTTagCompound nbt = new NBTTagCompound();
+        nbt.setTag(KEY_GROUPCRAFT, rGroupCraftClient.serialize());
         nbt.setTag(KEY_CRAFT, rCraftClient.serialize());
         nbt.setTag(KEY_PLAYER, rPlayerClient.serialize());
         nbt.setTag(KEY_MATH, rMathClient.serialize());

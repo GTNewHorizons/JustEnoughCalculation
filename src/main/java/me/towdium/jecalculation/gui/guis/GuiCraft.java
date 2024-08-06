@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import me.towdium.jecalculation.data.structure.RecordGroupCraft;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -50,7 +51,7 @@ public class GuiCraft extends Gui {
 
     Calculator calculator = null;
     RecordCraft record;
-    LinkedList<ILabel> currentCrafts;
+    RecordGroupCraft groupCraft;
     WLabel label = new WLabel(31, 7, 20, 20, true).setLsnrUpdate((i, v) -> {
         v.setAmount(getCurrentAmount());
         addLabel(v);
@@ -87,10 +88,7 @@ public class GuiCraft extends Gui {
     WButton invE = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
     WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
-        if (!currentCrafts.isEmpty()) {
-            currentCrafts.peekFirst().setAmount(getCurrentAmount());
-            refreshCrafts();
-        }
+        groupCraft.setAmount(0, getCurrentAmount());
     });
     WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
         ILabel item = i.get(v).getLabel();
@@ -100,15 +98,13 @@ public class GuiCraft extends Gui {
         refreshCrafts();
     }).setLsnrRightClick((i, v) -> {
         ILabel item = i.get(v).getLabel();
-        if (item != ILabel.EMPTY) {
-            currentCrafts.remove(item);
-        }
+        groupCraft.removeLabel(v);
         refreshCrafts();
     }).setFmtAmount(i -> i.getAmountString(true));
 
     public GuiCraft() {
         record = Controller.getRCraft();
-        currentCrafts = new LinkedList<>();
+        groupCraft = Controller.getRGroupCraft();
         amount.setText(record.amount);
         add(new WHelp("craft"));
         add(new WPanel(0, 0, 176, 186));
@@ -142,7 +138,7 @@ public class GuiCraft extends Gui {
             add(invE);
             refreshCalculator();
         });
-        refreshRecent();
+        refreshRecent(true);
         setMode(record.mode);
     }
 
@@ -171,8 +167,8 @@ public class GuiCraft extends Gui {
         refreshResult();
     }
 
-    void refreshRecent() {
-        label.setLabel(record.getLatest());
+    void refreshRecent(boolean notify) {
+        label.setLabel(record.getLatest(), notify);
         recent.setLabel(record.getHistory(), 0);
     }
 
@@ -181,7 +177,7 @@ public class GuiCraft extends Gui {
             String s = amount.getText();
             long i = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
             amount.setColor(JecaGui.COLOR_TEXT_WHITE);
-            List<ILabel> dest = currentCrafts;
+            List<ILabel> dest = groupCraft.getCraftList();
             CostList list = record.inventory ? new CostList(getInventory(), dest) : new CostList(dest);
             calculator = list.calculate();
         } catch (NumberFormatException | ArithmeticException e) {
@@ -226,7 +222,7 @@ public class GuiCraft extends Gui {
     private void refreshLabel(ILabel l, boolean replace, boolean suggest) {
         boolean dup = record.push(l, replace);
         Controller.setRCraft(record);
-        refreshRecent();
+        refreshRecent(false);
         refreshCalculator();
         if (suggest && findRecipe(l).isEmpty()) {
             Pair<List<ILabel>, List<ILabel>> guess = ILabel.CONVERTER.guess(Collections.singletonList(l), null);
@@ -249,14 +245,8 @@ public class GuiCraft extends Gui {
     }
 
     private void refreshCrafts() {
-        if (currentCrafts.size() == 0) {
-            return;
-        }
-        if (currentCrafts.size() > 9) {
-            currentCrafts.removeLast();
-        }
-        label.setLabel(currentCrafts.peekFirst());
-        craftingGroup.setLabel(currentCrafts, 1);
+        label.setLabel(groupCraft.getFirstOrEmpty(), false);
+        craftingGroup.setLabel(groupCraft.getCraftList(), 1);
         refreshCalculator();
     }
 
@@ -267,10 +257,11 @@ public class GuiCraft extends Gui {
 
     private void addLabel(ILabel l) {
         if (l == ILabel.EMPTY) return;
-
-        currentCrafts.remove(l);
-        currentCrafts.addFirst(l);
+        record.push(l, false);
+        Controller.setRCraft(record);
+        groupCraft.addLabel(l);
         refreshCrafts();
+        refreshRecent(false);
     }
 
     private static List<ILabel> findRecipe(ILabel l) {
