@@ -2,7 +2,13 @@ package me.towdium.jecalculation.gui.guis;
 
 import static me.towdium.jecalculation.data.structure.RecordCraft.Mode.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
