@@ -89,6 +89,7 @@ public class GuiCraft extends Gui {
     WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
         groupCraft.setAmount(0, getCurrentAmount());
+        refreshCalculator();
     });
     WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
         ILabel item = i.get(v).getLabel();
@@ -97,8 +98,7 @@ public class GuiCraft extends Gui {
         amount.setText(item.getAmountString(false));
         refreshCrafts();
     }).setLsnrRightClick((i, v) -> {
-        ILabel item = i.get(v).getLabel();
-        groupCraft.removeLabel(v);
+        groupCraft.removeLabel(v + 1);
         refreshCrafts();
     }).setFmtAmount(i -> i.getAmountString(true));
 
