@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import me.towdium.jecalculation.data.structure.RecordGroupCraft;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 
@@ -20,6 +19,7 @@ import me.towdium.jecalculation.data.label.ILabel;
 import me.towdium.jecalculation.data.structure.CostList;
 import me.towdium.jecalculation.data.structure.CostList.Calculator;
 import me.towdium.jecalculation.data.structure.RecordCraft;
+import me.towdium.jecalculation.data.structure.RecordGroupCraft;
 import me.towdium.jecalculation.gui.JecaGui;
 import me.towdium.jecalculation.gui.Resource;
 import me.towdium.jecalculation.gui.widgets.WButton;
@@ -92,15 +92,18 @@ public class GuiCraft extends Gui {
         refreshCalculator();
     });
     WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
-        ILabel item = i.get(v).getLabel();
+        ILabel item = i.get(v)
+            .getLabel();
         if (item == ILabel.EMPTY) return;
         addLabel(item);
         amount.setText(item.getAmountString(false));
         refreshCrafts();
-    }).setLsnrRightClick((i, v) -> {
-        groupCraft.removeLabel(v + 1);
-        refreshCrafts();
-    }).setFmtAmount(i -> i.getAmountString(true));
+    })
+        .setLsnrRightClick((i, v) -> {
+            groupCraft.removeLabel(v + 1);
+            refreshCrafts();
+        })
+        .setFmtAmount(i -> i.getAmountString(true));
 
     public GuiCraft() {
         record = Controller.getRCraft();
@@ -123,7 +126,17 @@ public class GuiCraft extends Gui {
         add(new WText(53, 13, JecaGui.Font.RAW, "x"));
         add(new WLine(55));
         add(new WIcon(151, 51, 18, 18, Resource.ICN_RECENT, "craft.history"));
-        add(craftingGroup, recent, label, input, output, catalyst, steps, result, amount, record.inventory ? invE : invD);
+        add(
+            craftingGroup,
+            recent,
+            label,
+            input,
+            output,
+            catalyst,
+            steps,
+            result,
+            amount,
+            record.inventory ? invE : invD);
         invE.setListener(i -> {
             record.inventory = false;
             Controller.setRCraft(record);

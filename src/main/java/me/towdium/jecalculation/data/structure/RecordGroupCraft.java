@@ -1,15 +1,15 @@
 package me.towdium.jecalculation.data.structure;
 
-import gregapi.data.IL;
-import me.towdium.jecalculation.data.Controller;
-import me.towdium.jecalculation.data.label.ILabel;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-
 import java.util.LinkedList;
 import java.util.List;
 
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+
+import me.towdium.jecalculation.data.label.ILabel;
+
 public class RecordGroupCraft implements IRecord {
+
     public static final String KEY_ITEMS = "items";
 
     LinkedList<ILabel> craftList = new LinkedList<>();
