@@ -50,17 +50,18 @@ public class GuiCraft extends Gui {
 
     Calculator calculator = null;
     RecordCraft record;
-    LinkedList<WLabel> currentCrafts;
-    WLabel label = new WLabel(31, 7, 20, 20, true).setLsnrUpdate((i, v) -> refreshLabel(v, false, true));
+    LinkedList<ILabel> currentCrafts;
+    WLabel label = new WLabel(31, 7, 20, 20, true).setLsnrUpdate((i, v) -> {
+        v.setAmount(getCurrentAmount());
+        addLabel(v);
+        refreshCrafts();
+    });
     WLabelGroup recent = new WLabelGroup(7, 51, 8, 1, false).setLsnrLeftClick((i, v) -> {
         ILabel l = i.get(v)
             .getLabel();
         if (l != ILabel.EMPTY) {
-            label.setLabel(
-                i.get(v)
-                    .getLabel()
-                    .copy(),
-                true);
+            addLabel(l);
+            refreshCrafts();
         }
     });
     WLabelScroll result = new WLabelScroll(7, 107, 8, 4, false).setLsnrLeftClick((i, v) -> {
@@ -86,24 +87,23 @@ public class GuiCraft extends Gui {
     WButton invE = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
     WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
-        record.amount = i.getText();
-        Controller.setRCraft(record);
-        refreshCalculator();
-    });
-    WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, true).setLsnrUpdate((i, v) -> {
-        String s = amount.getText();
-        long am = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
-        i.get(v).getLabel().setAmount(am);
-        refreshCalculator();
-    }).setLsnrLeftClick((i, v) -> {
-        label.setLabel(i.get(v).getLabel());
-    }).setLsnrRightClick((i, v) -> {
-        ILabel l = i.get(v)
-                .getLabel();
-        if (l != ILabel.EMPTY) {
-            i.setLabel(ILabel.EMPTY, v);
+        if (!currentCrafts.isEmpty()) {
+            currentCrafts.peekFirst().setAmount(getCurrentAmount());
+            refreshCrafts();
         }
-        refreshCalculator();
+    });
+    WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
+        ILabel item = i.get(v).getLabel();
+        if (item == ILabel.EMPTY) return;
+        addLabel(item);
+        amount.setText(item.getAmountString(false));
+        refreshCrafts();
+    }).setLsnrRightClick((i, v) -> {
+        ILabel item = i.get(v).getLabel();
+        if (item != ILabel.EMPTY) {
+            currentCrafts.remove(item);
+        }
+        refreshCrafts();
     }).setFmtAmount(i -> i.getAmountString(true));
 
     public GuiCraft() {
@@ -181,7 +181,7 @@ public class GuiCraft extends Gui {
             String s = amount.getText();
             long i = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
             amount.setColor(JecaGui.COLOR_TEXT_WHITE);
-            List<ILabel> dest = craftingGroup.getLabels();
+            List<ILabel> dest = currentCrafts;
             CostList list = record.inventory ? new CostList(getInventory(), dest) : new CostList(dest);
             calculator = list.calculate();
         } catch (NumberFormatException | ArithmeticException e) {
@@ -246,6 +246,31 @@ public class GuiCraft extends Gui {
             List<ILabel> list = new ArrayList<>(match);
             if (!match.isEmpty()) setOverlay(new Suggest(list.size() > 3 ? list.subList(0, 3) : list, !dup));
         }
+    }
+
+    private void refreshCrafts() {
+        if (currentCrafts.size() == 0) {
+            return;
+        }
+        if (currentCrafts.size() > 9) {
+            currentCrafts.removeLast();
+        }
+        label.setLabel(currentCrafts.peekFirst());
+        craftingGroup.setLabel(currentCrafts, 1);
+        refreshCalculator();
+    }
+
+    private long getCurrentAmount() {
+        String s = amount.getText();
+        return s.isEmpty() ? 1 : Long.parseLong(amount.getText());
+    }
+
+    private void addLabel(ILabel l) {
+        if (l == ILabel.EMPTY) return;
+
+        currentCrafts.remove(l);
+        currentCrafts.addFirst(l);
+        refreshCrafts();
     }
 
     private static List<ILabel> findRecipe(ILabel l) {
