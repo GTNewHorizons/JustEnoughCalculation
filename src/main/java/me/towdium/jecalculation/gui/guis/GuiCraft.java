@@ -2,13 +2,7 @@ package me.towdium.jecalculation.gui.guis;
 
 import static me.towdium.jecalculation.data.structure.RecordCraft.Mode.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -56,8 +50,9 @@ public class GuiCraft extends Gui {
 
     Calculator calculator = null;
     RecordCraft record;
+    LinkedList<WLabel> currentCrafts;
     WLabel label = new WLabel(31, 7, 20, 20, true).setLsnrUpdate((i, v) -> refreshLabel(v, false, true));
-    WLabelGroup recent = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
+    WLabelGroup recent = new WLabelGroup(7, 51, 8, 1, false).setLsnrLeftClick((i, v) -> {
         ILabel l = i.get(v)
             .getLabel();
         if (l != ILabel.EMPTY) {
@@ -68,7 +63,7 @@ public class GuiCraft extends Gui {
                 true);
         }
     });
-    WLabelScroll result = new WLabelScroll(7, 87, 8, 4, false).setLsnrLeftClick((i, v) -> {
+    WLabelScroll result = new WLabelScroll(7, 107, 8, 4, false).setLsnrLeftClick((i, v) -> {
         Object rep = i.get(v)
             .getLabel()
             .getRepresentation();
@@ -82,25 +77,41 @@ public class GuiCraft extends Gui {
         })
         .setFmtAmount(i -> i.getAmountString(true))
         .setFmtTooltip((i, j) -> i.getToolTip(j, true));
-    WButton steps = new WButtonIcon(64, 62, 20, 20, Resource.BTN_LIST, "craft.step").setListener(i -> setMode(STEPS));
-    WButton catalyst = new WButtonIcon(45, 62, 20, 20, Resource.BTN_CAT, "common.catalyst")
+    WButton steps = new WButtonIcon(64, 82, 20, 20, Resource.BTN_LIST, "craft.step").setListener(i -> setMode(STEPS));
+    WButton catalyst = new WButtonIcon(45, 82, 20, 20, Resource.BTN_CAT, "common.catalyst")
         .setListener(i -> setMode(CATALYST));
-    WButton output = new WButtonIcon(26, 62, 20, 20, Resource.BTN_OUT, "craft.output")
+    WButton output = new WButtonIcon(26, 82, 20, 20, Resource.BTN_OUT, "craft.output")
         .setListener(i -> setMode(OUTPUT));
-    WButton input = new WButtonIcon(7, 62, 20, 20, Resource.BTN_IN, "common.input").setListener(i -> setMode(INPUT));
-    WButton invE = new WButtonIcon(149, 62, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
-    WButton invD = new WButtonIcon(149, 62, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
+    WButton input = new WButtonIcon(7, 82, 20, 20, Resource.BTN_IN, "common.input").setListener(i -> setMode(INPUT));
+    WButton invE = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
+    WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
         record.amount = i.getText();
         Controller.setRCraft(record);
         refreshCalculator();
     });
+    WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, true).setLsnrUpdate((i, v) -> {
+        String s = amount.getText();
+        long am = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
+        i.get(v).getLabel().setAmount(am);
+        refreshCalculator();
+    }).setLsnrLeftClick((i, v) -> {
+        label.setLabel(i.get(v).getLabel());
+    }).setLsnrRightClick((i, v) -> {
+        ILabel l = i.get(v)
+                .getLabel();
+        if (l != ILabel.EMPTY) {
+            i.setLabel(ILabel.EMPTY, v);
+        }
+        refreshCalculator();
+    }).setFmtAmount(i -> i.getAmountString(true));
 
     public GuiCraft() {
         record = Controller.getRCraft();
+        currentCrafts = new LinkedList<>();
         amount.setText(record.amount);
         add(new WHelp("craft"));
-        add(new WPanel());
+        add(new WPanel(0, 0, 176, 186));
         add(
             new WButtonIcon(7, 7, 20, 20, Resource.BTN_LABEL, "craft.label")
                 .setListener(i -> JecaGui.displayGui(new GuiLabel(l -> {
@@ -115,8 +126,8 @@ public class GuiCraft extends Gui {
                 .setListener(i -> JecaGui.displayGui(new GuiSearch())));
         add(new WText(53, 13, JecaGui.Font.RAW, "x"));
         add(new WLine(55));
-        add(new WIcon(151, 31, 18, 18, Resource.ICN_RECENT, "craft.history"));
-        add(recent, label, input, output, catalyst, steps, result, amount, record.inventory ? invE : invD);
+        add(new WIcon(151, 51, 18, 18, Resource.ICN_RECENT, "craft.history"));
+        add(craftingGroup, recent, label, input, output, catalyst, steps, result, amount, record.inventory ? invE : invD);
         invE.setListener(i -> {
             record.inventory = false;
             Controller.setRCraft(record);
@@ -170,10 +181,7 @@ public class GuiCraft extends Gui {
             String s = amount.getText();
             long i = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
             amount.setColor(JecaGui.COLOR_TEXT_WHITE);
-            List<ILabel> dest = Collections.singletonList(
-                label.getLabel()
-                    .copy()
-                    .setAmount(i));
+            List<ILabel> dest = craftingGroup.getLabels();
             CostList list = record.inventory ? new CostList(getInventory(), dest) : new CostList(dest);
             calculator = list.calculate();
         } catch (NumberFormatException | ArithmeticException e) {
