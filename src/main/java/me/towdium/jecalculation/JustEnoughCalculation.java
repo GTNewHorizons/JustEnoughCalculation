@@ -33,8 +33,8 @@ public class JustEnoughCalculation {
     public static Logger logger = LogManager.getLogger(Tags.MODID);
 
     @SidedProxy(
-        clientSide = "me.towdium.jecalculation.network.ClientProxy",
-        serverSide = "me.towdium.jecalculation.network.CommonProxy")
+        clientSide = Tags.GROUPNAME + ".network.ClientProxy",
+        serverSide = Tags.GROUPNAME + ".network.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.Instance(Tags.MODID)
