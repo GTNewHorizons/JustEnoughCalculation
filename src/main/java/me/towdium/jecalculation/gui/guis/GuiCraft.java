@@ -94,7 +94,9 @@ public class GuiCraft extends Gui {
     WButton invE = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
     WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
-        groupCraft.setAmount(0, getCurrentAmount());
+        long amount = getCurrentAmount();
+        groupCraft.setAmount(0, amount);
+        record.amount = Long.toString(amount);
         refreshCalculator();
     });
     WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
