@@ -271,7 +271,11 @@ public class GuiCraft extends Gui {
 
     private long getCurrentAmount() {
         String s = amount.getText();
-        return s.isEmpty() ? 1 : Long.parseLong(amount.getText());
+        try {
+            return s.isEmpty() ? 1 : Long.parseLong(amount.getText());
+        } catch (NumberFormatException ignored) {
+            return 1;
+        }
     }
 
     private void addLabel(ILabel l) {
