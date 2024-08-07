@@ -58,8 +58,9 @@ public class GuiCraft extends Gui {
     Calculator calculator = null;
     RecordCraft record;
     RecordGroupCraft groupCraft;
+    long currentAmount = 1;
     WLabel label = new WLabel(31, 7, 20, 20, true).setLsnrUpdate((i, v) -> {
-        v.setAmount(getCurrentAmount());
+        v.setAmount(currentAmount);
         addLabel(v);
         refreshCrafts();
     });
@@ -94,9 +95,19 @@ public class GuiCraft extends Gui {
     WButton invE = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_E, "craft.inventory_enabled");
     WButton invD = new WButtonIcon(149, 82, 20, 20, Resource.BTN_INV_D, "craft.inventory_disabled");
     WTextField amount = new WTextField(60, 7, 65).setListener(i -> {
-        long amount = getCurrentAmount();
-        groupCraft.setAmount(0, amount);
-        record.amount = Long.toString(amount);
+        String text = i.getText();
+        if (text.isEmpty()) return;
+        text = text.replaceAll("[^0-9]", "");
+        try {
+            currentAmount = Long.parseLong(text);
+            if (currentAmount < 1) currentAmount = 1;
+        } catch (NumberFormatException e) {
+            currentAmount = 1;
+        }
+        String s = Long.toString(currentAmount);
+        i.setText(s); // This is not a recursive call
+        groupCraft.setAmount(0, currentAmount);
+        record.amount = s;
         refreshCalculator();
     });
     WLabelGroup craftingGroup = new WLabelGroup(7, 31, 8, 1, false).setLsnrLeftClick((i, v) -> {
@@ -117,6 +128,7 @@ public class GuiCraft extends Gui {
         record = Controller.getRCraft();
         groupCraft = Controller.getRGroupCraft();
         amount.setText(record.amount);
+        currentAmount = record.amount.isEmpty() ? 1 : Long.parseLong(record.amount);
         add(new WHelp("craft"));
         add(new WPanel(0, 0, 176, 186));
         add(
@@ -269,15 +281,6 @@ public class GuiCraft extends Gui {
         label.setLabel(groupCraft.getFirstOrEmpty(), false);
         craftingGroup.setLabel(groupCraft.getCraftList(), 1);
         refreshCalculator();
-    }
-
-    private long getCurrentAmount() {
-        String s = amount.getText();
-        try {
-            return s.isEmpty() ? 1 : Long.parseLong(amount.getText());
-        } catch (NumberFormatException ignored) {
-            return 1;
-        }
     }
 
     private void addLabel(ILabel l) {
