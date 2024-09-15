@@ -265,7 +265,10 @@ public interface ILabel {
          * Converts an {@code ItemStack} to its corresponding {@link ILabel} implementation.
          *
          * @param item The {@code ItemStack} to convert.
-         * @return The corresponding {@link ILabel} implementation, or {@link ILabel.LEmpty} if none could be found.
+         * @return A {@link LItemStack} if the passed argument is an item stack, a {@link LFluidStack} if the past
+         *         item is a fluid stack or an item stack containing a fluid. If the item is neither, returns an
+         *         instance of {@link LPlaceholder}. If the argument is {@code null}, returns an instance of
+         *         {@link ILabel.LEmpty}.
          */
         public static ILabel from(@Nullable Object item) {
             if (item == null) {
