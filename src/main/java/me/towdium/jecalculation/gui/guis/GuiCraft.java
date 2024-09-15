@@ -220,14 +220,20 @@ public class GuiCraft extends Gui {
         refreshResult();
     }
 
+    /*
+     * Gets all items in the player's inventory. Additionally, checks a list of fluid containers to see if the player
+     * carries and fluids for crafting tasks with them.
+     */
     List<ILabel> getInventory() {
         InventoryPlayer inv = Utilities.getPlayer().inventory;
         ArrayList<ILabel> labels = new ArrayList<>();
+
         Consumer<ItemStack[]> add = i -> Arrays.stream(i)
             .filter(j -> !ItemStackHelper.isEmpty(j))
             .forEach(j -> labels.add(ILabel.Converter.from(j)));
         add.accept(inv.armorInventory);
         add.accept(inv.mainInventory);
+
         return labels;
     }
 

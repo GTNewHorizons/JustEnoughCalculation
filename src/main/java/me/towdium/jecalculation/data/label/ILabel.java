@@ -1,5 +1,7 @@
 package me.towdium.jecalculation.data.label;
 
+import static me.towdium.jecalculation.utils.ItemStackHelper.isGregTechLargeFluidContainer;
+
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.util.GT_Utility;
 import me.towdium.jecalculation.JustEnoughCalculation;
 import me.towdium.jecalculation.data.label.labels.LFluidStack;
 import me.towdium.jecalculation.data.label.labels.LItemStack;
@@ -194,7 +197,7 @@ public interface ILabel {
          * @param nbt NBT to deserialize
          * @return the recovered label
          *         A typical NBT structure of an {@link ILabel} is as follows:
-         * 
+         *
          *         <pre>
          * {@code
          * {
@@ -258,18 +261,45 @@ public interface ILabel {
             handlers.put(Priority.FALLBACK, new ArrayList<>());
         }
 
-        public static ILabel from(@Nullable Object o) {
-            if (o == null) return ILabel.EMPTY;
-            else if (o instanceof ItemStack) return new LItemStack((ItemStack) o);
-            else if (o instanceof FluidStack) return new LFluidStack((FluidStack) o);
-            else if (o instanceof EnchantmentData) {
-                ItemStack itemStack = new ItemStack(Items.enchanted_book);
-                new ItemEnchantedBook().addEnchantment(itemStack, (EnchantmentData) o);
-                return new LItemStack(itemStack);
-            } else {
-                JustEnoughCalculation.logger.warn("Unrecognized ingredient type: " + o.getClass());
-                return LPlaceholder.Converter.from(o);
+        /**
+         * Converts an {@code ItemStack} to its corresponding {@link ILabel} implementation.
+         *
+         * @param item The {@code ItemStack} to convert.
+         * @return The corresponding {@link ILabel} implementation, or {@link ILabel.LEmpty} if none could be found.
+         */
+        public static ILabel from(@Nullable Object item) {
+            if (item == null) {
+                return ILabel.EMPTY;
             }
+
+            if (item instanceof ItemStack) {
+                // We require special handling of item stacks that contain fluids. For those, we check if they are any
+                // variant of the large fluid cell. If that is the case, we return a fluid stack instead of an item
+                // stack label. `getFluidForFilledItem` returns `null` if the cell is empty. For those cases, we still
+                // return an item stack label.
+                ItemStack itemStack = (ItemStack) item;
+                if (isGregTechLargeFluidContainer(itemStack)) {
+                    FluidStack fluidStack = GT_Utility.getFluidForFilledItem(itemStack, true);
+                    if (fluidStack != null) {
+                        return new LFluidStack(fluidStack);
+                    }
+                }
+
+                return new LItemStack((ItemStack) item);
+            }
+
+            if (item instanceof FluidStack) {
+                return new LFluidStack((FluidStack) item);
+            }
+
+            if (item instanceof EnchantmentData) {
+                ItemStack itemStack = new ItemStack(Items.enchanted_book);
+                new ItemEnchantedBook().addEnchantment(itemStack, (EnchantmentData) item);
+                return new LItemStack(itemStack);
+            }
+
+            JustEnoughCalculation.logger.warn("Unrecognized ingredient type: {}", item.getClass());
+            return LPlaceholder.Converter.from(item);
         }
 
         public void register(ConverterFunction handler, Priority priority) {

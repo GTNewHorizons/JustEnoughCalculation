@@ -20,8 +20,7 @@ import me.towdium.jecalculation.gui.Resource;
 import me.towdium.jecalculation.utils.Utilities;
 
 /**
- * Author: towdium
- * Date: 17-9-27.
+ * A label that represents some quantity of a fluid.
  */
 @ParametersAreNonnullByDefault
 public class LFluidStack extends ILabel.Impl {
@@ -30,10 +29,24 @@ public class LFluidStack extends ILabel.Impl {
     public static final String KEY_FLUID = "fluid";
     public static final String KEY_NBT = "nbt";
 
+    /**
+     * The fluid the label represents.
+     */
     Fluid fluid;
+
+    /**
+     * The fluids optional NBT tag.
+     */
     NBTTagCompound nbt;
+
+    /**
+     * An instance of {@link FluidStack} that represents the fluid inside inventories.
+     */
     FluidStack temp;
 
+    /**
+     * Returns the fluid (item) stack representation.
+     */
     @Override
     public FluidStack getRepresentation() {
         return temp;
