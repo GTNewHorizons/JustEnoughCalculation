@@ -22,4 +22,8 @@ dependencies {
 //    runtime("curse.maven:cofh-core-69162:2388751")
 
     testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
+
+    // Required to load in GTNH mods inside the dev environment for testing. Useful for checking item stack label
+    // generation.
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:GT5-Unofficial:5.09.48.133:dev")
 }
