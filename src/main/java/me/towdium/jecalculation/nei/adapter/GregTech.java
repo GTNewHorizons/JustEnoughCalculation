@@ -34,14 +34,12 @@ public class GregTech implements IAdapter {
         try {
             Class.forName("gregtech.api.recipe.RecipeMap");
             isPreRecipeRefactor = false;
-        } catch (ClassNotFoundException e) {
-        }
+        } catch (ClassNotFoundException e) {}
 
         Class<?> gtAL = null;
         try {
             gtAL = Class.forName("gregtech.nei.GT_NEI_AssLineHandler");
-        } catch (ClassNotFoundException e) {
-        }
+        } catch (ClassNotFoundException e) {}
 
         gtDefault = loadDefaultRecipeHandler();
         gtAssLine = gtAL;
@@ -172,11 +170,8 @@ public class GregTech implements IAdapter {
     }
 
     private static Class<?> loadDefaultRecipeHandler() {
-        String[] classNames = {
-            "gregtech.nei.GT_NEI_DefaultHandler",
-            "gregtech.nei.GTNEIDefaultHandler"
-        };
-        for (String name: classNames) {
+        String[] classNames = { "gregtech.nei.GT_NEI_DefaultHandler", "gregtech.nei.GTNEIDefaultHandler" };
+        for (String name : classNames) {
             try {
                 return Class.forName(name);
             } catch (ClassNotFoundException ignored) {}
