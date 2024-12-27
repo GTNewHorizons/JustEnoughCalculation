@@ -25,7 +25,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import gregtech.api.util.GT_Utility;
+import gregtech.api.util.GTUtility;
 import me.towdium.jecalculation.JustEnoughCalculation;
 import me.towdium.jecalculation.data.label.labels.LFluidStack;
 import me.towdium.jecalculation.data.label.labels.LItemStack;
@@ -282,7 +282,7 @@ public interface ILabel {
                 // return an item stack label.
                 ItemStack itemStack = (ItemStack) item;
                 if (isGregTechLargeFluidContainer(itemStack)) {
-                    FluidStack fluidStack = GT_Utility.getFluidForFilledItem(itemStack, true);
+                    FluidStack fluidStack = GTUtility.getFluidForFilledItem(itemStack, true);
                     if (fluidStack != null) {
                         return new LFluidStack(fluidStack);
                     }
