@@ -36,12 +36,12 @@ public class GregTech implements IAdapter {
             isPreRecipeRefactor = false;
         } catch (ClassNotFoundException e) {}
 
-        Class<?> gtDf = null, gtAL = null;
+        Class<?> gtAL = null;
         try {
-            gtDf = Class.forName("gregtech.nei.GT_NEI_DefaultHandler");
             gtAL = Class.forName("gregtech.nei.GT_NEI_AssLineHandler");
         } catch (ClassNotFoundException e) {}
-        gtDefault = gtDf;
+
+        gtDefault = loadDefaultRecipeHandler();
         gtAssLine = gtAL;
     }
 
@@ -167,5 +167,15 @@ public class GregTech implements IAdapter {
     private static boolean isStackValid(Object aStack) {
         return (aStack instanceof ItemStack) && ((ItemStack) aStack).getItem() != null
             && ((ItemStack) aStack).stackSize >= 0;
+    }
+
+    private static Class<?> loadDefaultRecipeHandler() {
+        String[] classNames = { "gregtech.nei.GT_NEI_DefaultHandler", "gregtech.nei.GTNEIDefaultHandler" };
+        for (String name : classNames) {
+            try {
+                return Class.forName(name);
+            } catch (ClassNotFoundException ignored) {}
+        }
+        return null;
     }
 }

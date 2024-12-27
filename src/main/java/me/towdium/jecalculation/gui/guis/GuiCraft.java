@@ -22,8 +22,9 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import me.towdium.jecalculation.data.Controller;
 import me.towdium.jecalculation.data.label.ILabel;
+import me.towdium.jecalculation.data.structure.Calculation;
 import me.towdium.jecalculation.data.structure.CostList;
-import me.towdium.jecalculation.data.structure.CostList.Calculator;
+import me.towdium.jecalculation.data.structure.MainCostListService;
 import me.towdium.jecalculation.data.structure.RecordCraft;
 import me.towdium.jecalculation.data.structure.RecordGroupCraft;
 import me.towdium.jecalculation.gui.JecaGui;
@@ -55,7 +56,7 @@ import me.towdium.jecalculation.utils.wrappers.Pair;
 @SideOnly(Side.CLIENT)
 public class GuiCraft extends Gui {
 
-    Calculator calculator = null;
+    Calculation<ILabel> calculator = null;
     RecordCraft record;
     RecordGroupCraft groupCraft;
     long currentAmount = 1;
@@ -211,7 +212,8 @@ public class GuiCraft extends Gui {
             long i = s.isEmpty() ? 1 : Long.parseLong(amount.getText());
             amount.setColor(JecaGui.COLOR_TEXT_WHITE);
             List<ILabel> dest = groupCraft.getCraftList();
-            CostList list = record.inventory ? new CostList(getInventory(), dest) : new CostList(dest);
+            CostList list = record.inventory ? MainCostListService.INSTANCE.newPosNegCostList(getInventory(), dest)
+                : MainCostListService.INSTANCE.newNegatedCostList(dest);
             calculator = list.calculate();
         } catch (NumberFormatException | ArithmeticException e) {
             amount.setColor(JecaGui.COLOR_TEXT_RED);
@@ -252,7 +254,7 @@ public class GuiCraft extends Gui {
                     result.setLabels(calculator.getCatalysts());
                     break;
                 case STEPS:
-                    result.setLabels(calculator.getSteps());
+                    result.setLabels(calculator.getSteps(getInventory()));
                     break;
             }
         }
