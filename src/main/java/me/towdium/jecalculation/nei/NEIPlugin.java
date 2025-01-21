@@ -1,5 +1,7 @@
 package me.towdium.jecalculation.nei;
 
+import java.lang.reflect.Method;
+
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
@@ -7,6 +9,7 @@ import codechicken.nei.guihook.GuiContainerManager;
 import codechicken.nei.recipe.GuiCraftingRecipe;
 import codechicken.nei.recipe.GuiUsageRecipe;
 import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.relauncher.ReflectionHelper;
 import me.towdium.jecalculation.JustEnoughCalculation;
 import me.towdium.jecalculation.data.label.ILabel;
 import me.towdium.jecalculation.utils.Version;
@@ -50,7 +53,47 @@ public class NEIPlugin {
         NEIPlugin.currentItemStack = itemStack;
     }
 
+    private static class FluidStackToItemStack {
+
+        private static Method getFluidDisplayStack = null;
+
+        static {
+            try {
+                final Class<?> gtUtility = ReflectionHelper.getClass(
+                    FluidStackToItemStack.class.getClassLoader(),
+                    "gregtech.api.util.GTUtility",
+                    "gregtech.api.util.GT_Utility");
+
+                getFluidDisplayStack = gtUtility.getMethod("getFluidDisplayStack", FluidStack.class, boolean.class);
+            } catch (Exception ignored) {
+                /* Do nothing */
+            }
+        }
+
+        private static ItemStack getItemStack(FluidStack fluidStack) {
+            if (getFluidDisplayStack == null) {
+                return null;
+            }
+            Object itemStack;
+            try {
+                itemStack = getFluidDisplayStack.invoke(null, fluidStack, true);
+            } catch (Exception e) {
+                return null;
+            }
+            if (itemStack instanceof ItemStack) {
+                return (ItemStack) itemStack;
+            }
+            return null;
+        }
+    }
+
     public static boolean openRecipeGui(Object rep, boolean usage) {
+        if (rep instanceof FluidStack) {
+            ItemStack itemStack = FluidStackToItemStack.getItemStack((FluidStack) rep);
+            if (itemStack != null) {
+                rep = itemStack;
+            }
+        }
         if ((rep instanceof ItemStack || rep instanceof FluidStack)) {
             String id = rep instanceof ItemStack ? "item" : "liquid";
             if (!usage) {
