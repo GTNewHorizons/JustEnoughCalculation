@@ -1,9 +1,9 @@
 // Add your dependencies here
 
 dependencies {
-//    compile("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-523-GTNH:dev")
+//    compile("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-527-GTNH:dev")
     compile("com.github.GTNewHorizons:CodeChickenCore:1.4.1:dev")
-    compile("com.github.GTNewHorizons:NotEnoughItems:2.7.22-GTNH:dev")
+    compile("com.github.GTNewHorizons:NotEnoughItems:2.7.23-GTNH:dev")
 //    compile("com.github.GTNewHorizons:Baubles:1.0.4:dev")
 //    compile("com.github.GTNewHorizons:WirelessCraftingTerminal:1.11.7:dev")
 
@@ -12,7 +12,7 @@ dependencies {
 //    compileOnly("com.github.GTNewHorizons:BuildCraftCompat:7.1.17:dev") { transitive = false }
     compileOnly('com.github.GTNewHorizons:EnderIO:2.9.2:dev') { transitive = false }
     compileOnly("com.github.GTNewHorizons:ForestryMC:4.10.1:dev") { transitive = false }
-    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.81-meteor:dev") { transitive = false }
+    compileOnly("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.85:dev") { transitive = false }
 //    compileOnly("com.github.GTNewHorizons:ThaumicEnergistics:1.7.5-GTNH:dev") { transitive = false }
     compileOnly("com.github.GTNewHorizons:Botania:1.12.5-GTNH:dev") { transitive = false }
     compileOnly("com.gregoriust.gregtech:gregtech_1.7.10:6.14.23:dev") { transitive = false }
@@ -25,5 +25,5 @@ dependencies {
 
     // Required to load in GTNH mods inside the dev environment for testing. Useful for checking item stack label
     // generation.
-    runtimeOnlyNonPublishable("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.81-meteor:dev")
+    runtimeOnlyNonPublishable("com.github.GTNewHorizons:GT5-Unofficial:5.09.51.85:dev")
 }
