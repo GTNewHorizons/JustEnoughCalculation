@@ -15,6 +15,8 @@ import me.towdium.jecalculation.nei.NEIPlugin;
 
 public class NEIEventHandler implements IContainerInputHandler {
 
+    private static final boolean isFindItLoaded = Loader.isModLoaded("findit");
+
     @Override
     public boolean keyTyped(GuiContainer guiContainer, char c, int i) {
         return false;
@@ -42,7 +44,7 @@ public class NEIEventHandler implements IContainerInputHandler {
             if (keyCode == NEIClientConfig.getKeyBinding("gui.recipe")) {
                 return NEIPlugin.openRecipeGui(stack, false);
             }
-            if (Loader.isModLoaded("findit")) {
+            if (isFindItLoaded) {
                 if (keyCode == NEIClientConfig.getKeyBinding(getFindItKeyBind())) {
                     return NEIPlugin.findItem(stack);
                 }
