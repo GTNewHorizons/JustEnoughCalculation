@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 
+import com.gtnh.findit.FindItNetwork;
+import com.gtnh.findit.service.itemfinder.FindItemRequest;
+
 import codechicken.nei.guihook.GuiContainerManager;
 import codechicken.nei.recipe.GuiCraftingRecipe;
 import codechicken.nei.recipe.GuiUsageRecipe;
@@ -106,4 +109,19 @@ public class NEIPlugin {
         }
         return false;
     }
+
+    public static boolean findItem(Object rep) {
+        if (rep instanceof FluidStack) {
+            ItemStack itemStack = FluidStackToItemStack.getItemStack((FluidStack) rep);
+            if (itemStack != null) {
+                rep = itemStack;
+            }
+        }
+        if (rep instanceof ItemStack) {
+            FindItNetwork.CHANNEL.sendToServer(new FindItemRequest((ItemStack) rep));
+
+        }
+        return true;
+    }
+
 }

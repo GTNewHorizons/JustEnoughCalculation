@@ -3,14 +3,19 @@ package me.towdium.jecalculation.event.handlers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.inventory.GuiContainer;
 
+import com.gtnh.findit.FindIt;
+
 import codechicken.nei.NEIClientConfig;
 import codechicken.nei.NEIClientUtils;
 import codechicken.nei.guihook.IContainerInputHandler;
+import cpw.mods.fml.common.Loader;
 import me.towdium.jecalculation.data.label.ILabel;
 import me.towdium.jecalculation.gui.JecaGui;
 import me.towdium.jecalculation.nei.NEIPlugin;
 
 public class NEIEventHandler implements IContainerInputHandler {
+
+    private static final boolean isFindItLoaded = Loader.isModLoaded("findit");
 
     @Override
     public boolean keyTyped(GuiContainer guiContainer, char c, int i) {
@@ -19,6 +24,10 @@ public class NEIEventHandler implements IContainerInputHandler {
 
     @Override
     public void onKeyTyped(GuiContainer guiContainer, char c, int i) {}
+
+    protected String getFindItKeyBind() {
+        return FindIt.isExtraUtilitiesLoaded() ? "gui.xu_ping" : "gui.findit.find_item";
+    }
 
     @Override
     public boolean lastKeyTyped(GuiContainer guiContainer, char keyChar, int keyCode) {
@@ -34,6 +43,11 @@ public class NEIEventHandler implements IContainerInputHandler {
             }
             if (keyCode == NEIClientConfig.getKeyBinding("gui.recipe")) {
                 return NEIPlugin.openRecipeGui(stack, false);
+            }
+            if (isFindItLoaded) {
+                if (keyCode == NEIClientConfig.getKeyBinding(getFindItKeyBind())) {
+                    return NEIPlugin.findItem(stack);
+                }
             }
 
             return false;
